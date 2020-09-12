@@ -1,20 +1,24 @@
 # DisasterVibes
-A consumer-to-consumer insurance platform.
+A consumer-to-consumer insurance platform automating the insurance claims process using smart contracts.
 
 ## Front-End
 - Web app (host on Heroku)
-- Insurance companies can input specific policies (diff weather conditions qualify for diaster conditions)
+- Insurance contracts can be created by inputting specific policies (such as different weather conditions qualifying for disaster conditions, payouts) to create a smart contract based on those parameters.
 
 ## Backend
 - Keep track of smart contracts (MongoDB database)
-- Pull weather API data
-- Marketplace bidding systems
+- Pull data from a weather API to verify claims
+- Marketplace bidding systems (V2)
     - Farmers create contracts that insurers can bid on.
 
-## Measurements
-- Rainfall 
+## Other
+# Measurements
+- Rainfall (most common)
 - Extreme Rainfall
-- Extreme Rainfall
+- Extreme Drought
 - Weather Index
+
+# Project Flow Diagram
+https://go.gliffy.com/go/html5/13361341
 
 
