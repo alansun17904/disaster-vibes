@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 // import { Formik, Form, Field, ErrorMessage } from "formik";
 import axios from "axios";
-import { Redirect } from "react-router-dom";
+import { Redirect , Link} from "react-router-dom";
 import { FormControl, Button, InputLabel, Input, FormHelperText, Select, MenuItem } from '@material-ui/core';
 
 const dateError =  "This is not a valid date.";
@@ -78,6 +78,11 @@ class Insured extends Component {
   render() {
     return (
       <div className="container">
+      <h3 className="m-0">
+                <Link style={{ textDecoration: 'none' }} to="/">
+                  {"DISASTER VIBES"}
+                </Link>
+              </h3>
         <div className="row mb-5">
           <div className="col-lg-12 text-center">
             <h1 className="mt-5">Smart Contract Form</h1>
