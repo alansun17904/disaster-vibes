@@ -7,18 +7,29 @@ def jprint(obj):
     text = json.dumps(obj, sort_keys=True, indent=4)
     print(text)
 
-# latitude and longitude of Pennsylvania
-lat = str(41.2)
-long = str(-77)
+""" Given a list of locations, it will get the latitude and longitude """
+locations = ['Philadelphia, US', 'New York City, US', 'Des Moines, US']
 
-response = requests.get('https://api.meteomatics.com/2020-09-12T00:00:00ZP1D:PT24H/precip_24h:mm/40.7,-73.9/json',
-                        auth=HTTPBasicAuth('columbia_xiao', '45Vcg7owWqZLK'))
-print(response.status_code)
-jprint(response.json())
+lat_dict = {}
+long_dict = {}
+master_rain_mm = {}
 
-""" Saves the rainfall over 24hrs data into a list called rain_mm """
-raw_rain_mm = response.json()['data'][0]['coordinates'][0]['dates']
-rain_mm = []
-for i in range(len(raw_rain_mm)):
-    rain_mm.append(raw_rain_mm[i]['value'])
-jprint(rain_mm)
+for location in locations:
+    url = 'https://geocode.xyz/' + location + 'US?geoit=json&auth=498370256388433344167x110797'
+    geocode = requests.get(url)
+    lat_dict[location] = geocode.json()['latt']
+    long_dict[location] = geocode.json()['longt']
+
+for loc in lat_dict:
+    url = 'https://api.meteomatics.com/2020-09-12T00:00:00Z/precip_24h:mm/' + lat_dict[loc] + ',' + long_dict[loc] + '/json'
+    response = requests.get(url,
+                            auth=HTTPBasicAuth('columbia_xiao', '45Vcg7owWqZLK'))
+
+    """ Saves the rainfall over 24hrs data into the dictionary master_rain_mm """
+    raw_rain_mm = response.json()['data'][0]['coordinates'][0]['dates'][0]['value']
+    #print(raw_rain_mm)
+    #rain_mm = []
+    #for i in range(len(raw_rain_mm)):
+    #    rain_mm.append(raw_rain_mm[i]['value'])
+    master_rain_mm[loc] = raw_rain_mm
+    print(master_rain_mm)
