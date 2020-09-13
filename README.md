@@ -21,6 +21,8 @@ and
 - Pull data from a weather API to verify claims
 - Marketplace bidding systems (V2)
     - Farmers create contracts that insurers can bid on.
+### End-Points
+
 
 ## Other
 # Measurements
