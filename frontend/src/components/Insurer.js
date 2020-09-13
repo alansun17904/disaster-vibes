@@ -13,33 +13,32 @@ import axios from "axios";
 
 const columns = [
   { id: 'name', label: 'Name', minWidth: 170 },
-  { id: 'code', label: 'ISO\u00a0Code', minWidth: 100 },
+  { id: 'location', label: 'Location', minWidth: 100 },
   {
-    id: 'population',
-    label: 'Population',
+    id: 'plan',
+    label: 'Plan',
     minWidth: 170,
     align: 'right',
     format: (value) => value.toLocaleString('en-US'),
   },
   {
-    id: 'size',
-    label: 'Size\u00a0(km\u00b2)',
+    id: 'payout',
+    label: 'Payout',
     minWidth: 170,
     align: 'right',
     format: (value) => value.toLocaleString('en-US'),
   },
   {
-    id: 'density',
-    label: 'Density',
+    id: 'rainfall',
+    label: 'Rainfall',
     minWidth: 170,
     align: 'right',
     format: (value) => value.toFixed(2),
   },
 ];
 
-function createData(name, code, population, size) {
-  const density = population / size;
-  return { name, code, population, size, density };
+function createData(name, location, plan, payout, rainfall) {
+  return { name, location, plan, payout, rainfall };
 }
 
 const useStyles = makeStyles({
@@ -61,13 +60,15 @@ export default function Insurer() {
 
   useEffect(() => {
     var tempRows = []
-     axios.get("contracts").then((res) => {
+     axios.get("/contracts").then((res) => {
         var i;
-        for(i = 0; i < data.length; i++) {
-            tempRows.push(createData('India', 'IN', 1324171354, 3287263))
+        for(i = 0; i < res.length; i++) {
+            // tempRows.push(createData('India', 'IN', 1324171354, 3287263))
+            tempRows.push(createData(res[i].insuredId, res[i].location, res[i].coveragePlan, res[i].payOut, res[i].thresholds.rainfall));
+            console.log(res[i].location);
         }
      })
-     setRows(tempRows)
+     setRows(tempRows);
   }, [])
   const handleChangePage = (event, newPage) => {
     setPage(newPage);

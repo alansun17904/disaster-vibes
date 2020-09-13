@@ -5,6 +5,13 @@ $ heroku logs --tail
 # DisasterVibes
 A consumer-to-consumer insurance platform automating the insurance claims process using smart contracts.
 
+# Directions to Deploy Locally
+```$ cd frontend```
+On two different terminal windows:
+```$ yarn start```
+and
+```$ yarn start-app```
+
 ## Front-End
 - Web app (host on Heroku)
 - Insurance contracts can be created by inputting specific policies (such as different weather conditions qualifying for disaster conditions, payouts) to create a smart contract based on those parameters.
