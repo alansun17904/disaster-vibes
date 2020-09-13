@@ -3,7 +3,7 @@ import React, { Component } from "react";
 import { Route } from "react-router-dom";
 import IndexPage from "./components";
 import Insured from "./components/Insured";
-// import Insurer from "./components/Insurer";
+import Insurer from "./components/Insurer";
 
 class App extends Component {
   render() {
@@ -23,13 +23,13 @@ class App extends Component {
             <Insured  />
           )}
         />
-        {/* <Route
+        <Route
           path="/insurer"
           exact
           render={props => (
             <Insurer />
           )}
-        /> */}
+        />
       </div>
     );
   }

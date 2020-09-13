@@ -1,87 +1,137 @@
-import LoadingView from "./LoadingView";
-import React, { Component } from "react";
+import React, {useEffect} from 'react';import { Redirect , Link} from "react-router-dom";
+
+import { makeStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TablePagination from '@material-ui/core/TablePagination';
+import TableRow from '@material-ui/core/TableRow';
 import axios from "axios";
 
-class Insurer extends Component {
-  constructor(props) {
-    super(props);
+const columns = [
+  { id: 'name', label: 'Name', minWidth: 170 },
+  { id: 'code', label: 'ISO\u00a0Code', minWidth: 100 },
+  {
+    id: 'population',
+    label: 'Population',
+    minWidth: 170,
+    align: 'right',
+    format: (value) => value.toLocaleString('en-US'),
+  },
+  {
+    id: 'size',
+    label: 'Size\u00a0(km\u00b2)',
+    minWidth: 170,
+    align: 'right',
+    format: (value) => value.toLocaleString('en-US'),
+  },
+  {
+    id: 'density',
+    label: 'Density',
+    minWidth: 170,
+    align: 'right',
+    format: (value) => value.toFixed(2),
+  },
+];
 
-    this.state = {
-      data: null,
-      isLoading: true
-    };
-  }
-
-  async componentDidMount() {
-    const data = await axios.get("http://localhost:8081/statistics");
-    console.log(data, "USerS");
-    this.setState({
-      data,
-      isLoading: false
-    });
-  }
-
-  getData() {
-    console.log("out of data");
-    setTimeout(() => {
-      const data = axios.get("http://localhost:8081/statistics").data;
-      console.log("inside of data");
-      this.setState({
-        data,
-        loading: false
-      });
-    }, 1000);
-  }
-
-  addSymbols(e) {
-    var suffixes = ["", "K", "M", "B"];
-    var order = Math.max(Math.floor(Math.log(e.value) / Math.log(1000)), 0);
-    if (order > suffixes.length - 1) order = suffixes.length - 1;
-    var suffix = suffixes[order];
-    return CanvasJS.formatNumber(e.value / Math.pow(1000, order)) + suffix;
-  }
-  render() {
-    console.log("IN RENDER", this.state.isLoading);
-    if (!this.state.isLoading) {
-      console.log(typeof this.state.data.data[0].data);
-      const options = {
-        animationEnabled: true,
-        theme: "light2",
-        title: {
-          text: "Users WorldWide on Cloud Providers"
-        },
-        axisX: {
-          title: "Cloud Providers",
-          reversed: true
-        },
-        axisY: {
-          title: "Worldwide Active Users",
-          labelFormatter: this.addSymbols
-        },
-        data: [
-          {
-            type: "bar",
-            dataPoints: [
-              { y: parseInt(this.state.data.data[0].data), label: "AWS" },
-              { y: parseInt(this.state.data.data[1].data), label: "GCP" },
-              { y: parseInt(this.state.data.data[2].data), label: "Azure" }
-            ]
-          }
-        ]
-      };
-      return (
-        <div>
-          <CanvasJSChart
-            options={options}
-            /* onRef={ref => this.chart = ref} */
-          />
-          {/*You can get reference to the chart instance as shown above using onRef. This allows you to access all chart properties and methods*/}
-        </div>
-      );
-    } else {
-      return <LoadingView />;
-    }
-  }
+function createData(name, code, population, size) {
+  const density = population / size;
+  return { name, code, population, size, density };
 }
 
-export default Insurer;
+const useStyles = makeStyles({
+  root: {
+    width: '100%',
+  },
+  container: {
+    maxHeight: 440,
+  },
+});
+
+export default function Insurer() {
+  const classes = useStyles();
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [data, setData] = React.useState(null)
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [rows, setRows] = React.useState([]);
+
+  useEffect(() => {
+    var tempRows = []
+     axios.get("contracts").then((res) => {
+        var i;
+        for(i = 0; i < data.length; i++) {
+            tempRows.push(createData('India', 'IN', 1324171354, 3287263))
+        }
+     })
+     setRows(tempRows)
+  }, [])
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
+  return (
+    <div className="container">
+      <h3 className="m-0">
+                <Link style={{ textDecoration: 'none' }} to="/">
+                  {"DISASTER VIBES"}
+                </Link>
+              </h3>
+        <div className="row mb-5">
+          <div className="col-lg-12 text-center">
+            <h1 className="mt-5">Insurer List</h1>
+          </div>
+      <TableContainer className={classes.container}>
+        <Table stickyHeader aria-label="sticky table">
+          <TableHead>
+            <TableRow>
+              {columns.map((column) => (
+                <TableCell
+                  key={column.id}
+                  align={column.align}
+                  style={{ minWidth: column.minWidth }}
+                >
+                  {column.label}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+              return (
+                <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
+                  {columns.map((column) => {
+                    const value = row[column.id];
+                    return (
+                      <TableCell key={column.id} align={column.align}>
+                        {column.format && typeof value === 'number' ? column.format(value) : value}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[10, 25, 100]}
+        component="div"
+        count={rows.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+      />
+    </div>
+    </div>
+  );
+}
