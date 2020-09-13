@@ -1,3 +1,7 @@
+View deployment here: https://disaster-vibes.herokuapp.com/
+
+$ heroku logs --tail
+
 # DisasterVibes
 A consumer-to-consumer insurance platform automating the insurance claims process using smart contracts.
 
@@ -22,5 +26,4 @@ A consumer-to-consumer insurance platform automating the insurance claims proces
 
 # Project Flow Diagram
 https://go.gliffy.com/go/html5/13361341
-
 
