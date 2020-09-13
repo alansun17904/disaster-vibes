@@ -37,8 +37,12 @@ const columns = [
   },
 ];
 
+var rows = []
+
 function createData(name, location, plan, payout, rainfall) {
-  return { name, location, plan, payout, rainfall };
+  var row = { name, location, plan, payout, rainfall };
+  rows.push(row);
+  return row;
 }
 
 const useStyles = makeStyles({
@@ -59,17 +63,19 @@ export default function Insurer() {
   const [rows, setRows] = React.useState([]);
 
   useEffect(() => {
-    var tempRows = []
-     axios.get("/contracts").then((res) => {
+    var tempRows = [];
+     axios.get("/contracts").then((response) => {
         var i;
+        var res = response.data
         for(i = 0; i < res.length; i++) {
-            // tempRows.push(createData('India', 'IN', 1324171354, 3287263))
-            tempRows.push(createData(res[i].insuredId, res[i].location, res[i].coveragePlan, res[i].payOut, res[i].thresholds.rainfall));
-            console.log(res[i].location);
+            // var rainfall = res[i].thresholds.rainfall;
+            tempRows.push(createData(res[i].insuredId, res[i].location, res[i].coveragePlan, res[i].payOut, 2)); //last field should be replaced with rainfall
         }
+        // console.log("Hello" + res[0].thresholds.rainfall);
      })
      setRows(tempRows);
   }, [])
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -94,32 +100,25 @@ export default function Insurer() {
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
+            <TableCell>Name (Insurer ID)</TableCell>
+            <TableCell align="right">Location</TableCell>
+            <TableCell align="right">Plan</TableCell>
+            <TableCell align="right">Payout</TableCell>
+            <TableCell align="right">Rainfall</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-              return (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                  {columns.map((column) => {
-                    const value = row[column.id];
-                    return (
-                      <TableCell key={column.id} align={column.align}>
-                        {column.format && typeof value === 'number' ? column.format(value) : value}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
+            {rows.map((row) => (
+            <TableRow key={row.name}>
+              <TableCell component="th" scope="row">
+                {row.name}
+              </TableCell>
+              <TableCell align="right">{row.location}</TableCell>
+              <TableCell align="right">{row.plan}</TableCell>
+              <TableCell align="right">{row.payout}</TableCell>
+              <TableCell align="right">{row.rainfall}</TableCell>
+            </TableRow>
+          ))}
           </TableBody>
         </Table>
       </TableContainer>
