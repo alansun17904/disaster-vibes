@@ -2,7 +2,7 @@ import React, { Component } from "react";
 // import NavBar from "./components/NavBar";
 import { Route } from "react-router-dom";
 import IndexPage from "./components";
-// import Insured from "./components/Insured";
+import Insured from "./components/Insured";
 // import Insurer from "./components/Insurer";
 
 class App extends Component {
@@ -16,14 +16,14 @@ class App extends Component {
             <IndexPage />
           )}
         />
-        {/* <Route
+        <Route
           path="/insured"
           exact
           render={props => (
             <Insured  />
           )}
         />
-        <Route
+        {/* <Route
           path="/insurer"
           exact
           render={props => (
