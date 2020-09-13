@@ -1,10 +1,11 @@
-pragma solidity >=0.4.22 <0.7.0;
+pragma solidity ^0.4.4;
 
+import "InsurCoin.sol";
 
 /**
  * @title Insurance
  */
-contract Insurance {
+contract Insurance is InsurCoin {
     address public id;
     address private insurer;
     address private insured;
@@ -15,6 +16,8 @@ contract Insurance {
     uint payout;
     int32 rainfallThreshold;
     bool claimable;
+    bool premiumCheck;
+    bool claimCheck;
     uint creationTime;
     
     enum State { Locked, Inactive, Active, Created }
@@ -28,7 +31,7 @@ contract Insurance {
     
     // modifier to check if caller is insured
     modifier isInsured() {
-        require(msg.sender == insurer, "Caller is not insured.");
+        require(msg.sender == insured, "Caller is not insured.");
         _;
     }
     
@@ -38,26 +41,34 @@ contract Insurance {
         _;
     }
 
-    event PayToInsured(address indexed insurerWallet, address indexed insuredWallet,
-                       uint amount);
-    event PayToInsurer(address indexed insurerWallet, address indexed insuredWallet,
-                       uint amount);
-
     /**
      * @dev Set contract deployer as owner
      */
     constructor(address _insured, address _insurer, string memory _location,
                 int32 _rainfallThreshold, uint _premium, uint _payout, uint _collateralPercentage) public {
+        // If the insurer cannot pay the collateral then the contract cannot be constructed.
+        require(
+            balances[_insurer] >= _payout * _collateralPercentage / 100,
+            "The insurer does not have enough in their account to pay the deposit/collateral."
+        );
+        require(
+            balances[_insured] >= _premium,
+            "The insured does not have enough in their account to pay the initial premium."
+        );
         insured = _insured;
         insurer = _insurer;
         location = _location;
         premium = _premium;
         payout = _payout;
         collateralPercentage = _collateralPercentage;
+        collateral = payout * collateralPercentage / 100;
         creationTime = now;
         state = State.Created;
         claimable = false;
+        premiumCheck = false;
+        claimCheck = false;
         rainfallThreshold = _rainfallThreshold;
+        balances[insurer] -= collateral;
     }
     
     function setState(State s) public isBothParties {
@@ -80,7 +91,15 @@ contract Insurance {
         return (collateral);
     }
     
+    function setClaimable(bool _claimable) public isBothParties {
+        claimable = _claimable;
+    }
+    
     function claim() public isInsured {
+        require(
+            claimCheck == false,
+            "The claim has already been claimed"
+        );
         require(
             state == State.Active,
             "This contract is not active."
@@ -89,10 +108,20 @@ contract Insurance {
             claimable == true,
             "The conditions of this contract are not met yet."
         );
-        emit PayToInsured(insurer, insured, payout);
+        if (transferFrom(insurer, msg.sender, payout)) {
+            claimCheck = true;
+            returnCollateral();
+            state = State.Locked;
+        } else {
+            balances[insured] += collateral;
+        }
     }
     
     function payOutPremium() public isInsurer {
+        require(
+            premiumCheck == false,
+            "The premium has already been payed."
+        );
         require(
             state == State.Active,
             "This contract is not active"
@@ -101,14 +130,31 @@ contract Insurance {
             claimable == false,
             "The conditions for claiming are met; therefore there will be no premiums outputted."
         );
-        emit PayToInsurer(insurer, insured, premium);
+        if (transferFrom(insured, msg.sender, premium)) {
+            premiumCheck = true;
+            returnCollateral();
+            state = State.Locked;
+        }
     }
     
-    // function collectCollateral() payable public isInsurer {
-    //     require(
-    //         msg.value >= collateralPercentage * payout,
-    //         "The amount of collateral that you paid is not enough to cover the "
-    //     );
-        
-    // }
+    function returnCollateral() public isInsurer {
+        require(
+            state != State.Locked,
+            "This contract is closed."
+        );
+        require(
+            state == State.Inactive,
+            "This contract is still active"
+        );
+        require(
+            claimable == false,
+            "The conditions for claiming are met; therefore the collateral + any additional payments have been forwarded to the insured party."
+        );
+        require(
+            premiumCheck || claimCheck,
+            "One party still needs to claim / pay their dues before collateral can be refunded."
+        );
+        state = State.Locked;
+        balances[insurer] += collateral;
+    }
 }
